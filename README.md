@@ -10,12 +10,16 @@ Authentication and User Management
 
 Authenticates a user and returns a token.
 • POST /api/v1/auth/register
+
 Registers a new user.
 • POST /api/v1/auth/logout
+
 Logs out the user and invalidates the current token.
 • GET /api/v1/auth/verify/:token
+
 Verifies a user’s email using a token.
 • POST /api/v1/auth/forgot-password
+
 Sends a password reset link to the user’s email.
 • PATCH /api/v1/auth/reset-password/:token
 Resets the password using a token.
@@ -50,7 +54,7 @@ Submits a new score.
 
 ```bash
 git clone <repository_url>
-cd terra-bootcamp
+cd terra-quiz-app
 npm install
 NODE_ENV=development
 PORT=9090
