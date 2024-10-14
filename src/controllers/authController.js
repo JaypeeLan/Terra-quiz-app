@@ -226,14 +226,10 @@ exports.forgotPassword = async (req, res, next) => {
     // Save user to database
     await user.save();
 
-    console.log("Reset token generated and saved:", resetToken);
-
     // Send reset token to user's email (just logging for now)
     const resetURL = `${req.protocol}://${req.get(
       "host"
     )}/api/v1/auth/reset-password/${resetToken}`;
-
-    console.log(`Password reset URL: ${resetURL}`);
 
     res.status(200).json({
       message: "Password reset link sent!",
