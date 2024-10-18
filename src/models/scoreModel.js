@@ -10,9 +10,12 @@ const scoreSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  quizId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Quiz",
+  subject: {
+    type: String,
+    required: true,
+  },
+  category: {
+    type: String,
     required: true,
   },
   date: {

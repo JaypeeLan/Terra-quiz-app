@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 const { AppError } = require("../middleware/errorHandler");
-const EmailService = require("../services/emailService");
+// const EmailService = require("../services/emailService");
 const crypto = require("crypto");
 const BlacklistedToken = require("../models/blacklistToken");
 
@@ -12,11 +12,11 @@ const signToken = (userId) => {
   });
 };
 
-const signVerificationToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.VERIFICATION_SECRET, {
-    expiresIn: "1h",
-  });
-};
+// const signVerificationToken = (userId) => {
+//   return jwt.sign({ id: userId }, process.env.VERIFICATION_SECRET, {
+//     expiresIn: "1h",
+//   });
+// };
 
 exports.signup = async (req, res, next) => {
   try {
@@ -60,7 +60,7 @@ exports.login = async (req, res, next) => {
 
     res.status(200).json({
       message: "User logged in successfully",
-      data: { user, token },
+      data: { name: user.name, email: user.email, token },
       success: true,
     });
   } catch (err) {
@@ -124,15 +124,6 @@ exports.protect = async (req, res, next) => {
       );
     }
 
-    if (currentUser.passwordChangedAfter(decoded.iat)) {
-      return next(
-        new AppError(
-          "User recently changed password! Please log in again.",
-          401
-        )
-      );
-    }
-
     req.user = currentUser;
     next();
   } catch (err) {
@@ -140,63 +131,63 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-exports.register = async (req, res, next) => {
-  try {
-    const newUser = await User.create(req.body);
+// exports.register = async (req, res, next) => {
+//   try {
+//     const newUser = await User.create(req.body);
 
-    const verificationToken = signVerificationToken(newUser._id);
-    newUser.verificationToken = verificationToken;
-    await newUser.save();
+//     const verificationToken = signVerificationToken(newUser._id);
+//     newUser.verificationToken = verificationToken;
+//     await newUser.save();
 
-    const verificationUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/v1/auth/verify/${verificationToken}`;
+//     const verificationUrl = `${req.protocol}://${req.get(
+//       "host"
+//     )}/api/v1/auth/verify/${verificationToken}`;
 
-    const emailService = new EmailService(newUser, verificationUrl);
-    await emailService.sendVerification();
+//     const emailService = new EmailService(newUser, verificationUrl);
+//     await emailService.sendVerification();
 
-    res.status(201).json({
-      message: "User registered. Please verify your email.",
-      success: true,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+//     res.status(201).json({
+//       message: "User registered. Please verify your email.",
+//       success: true,
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
-exports.verifyAccount = async (req, res, next) => {
-  try {
-    const { token } = req.params;
+// exports.verifyAccount = async (req, res, next) => {
+//   try {
+//     const { token } = req.params;
 
-    const decoded = jwt.verify(token, process.env.VERIFICATION_SECRET);
-    const user = await User.findOne({
-      _id: decoded.id,
-      verificationToken: token,
-    });
+//     const decoded = jwt.verify(token, process.env.VERIFICATION_SECRET);
+//     const user = await User.findOne({
+//       _id: decoded.id,
+//       verificationToken: token,
+//     });
 
-    if (!user) {
-      return next(new AppError("Invalid or expired verification token", 400));
-    }
+//     if (!user) {
+//       return next(new AppError("Invalid or expired verification token", 400));
+//     }
 
-    if (user.isVerified) {
-      return next(new AppError("User is already verified", 400));
-    }
+//     if (user.isVerified) {
+//       return next(new AppError("User is already verified", 400));
+//     }
 
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    await user.save();
+//     user.isVerified = true;
+//     user.verificationToken = undefined;
+//     await user.save();
 
-    res.status(200).json({
-      message: "Account verified successfully.",
-      success: true,
-    });
-  } catch (err) {
-    if (err instanceof jwt.JsonWebTokenError) {
-      return next(new AppError("Invalid token. Please try again.", 400));
-    }
-    next(err);
-  }
-};
+//     res.status(200).json({
+//       message: "Account verified successfully.",
+//       success: true,
+//     });
+//   } catch (err) {
+//     if (err instanceof jwt.JsonWebTokenError) {
+//       return next(new AppError("Invalid token. Please try again.", 400));
+//     }
+//     next(err);
+//   }
+// };
 
 exports.forgotPassword = async (req, res, next) => {
   try {
@@ -239,6 +230,7 @@ exports.forgotPassword = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.resetPassword = async (req, res, next) => {
   try {
     // Hash the token from the URL before comparing it
