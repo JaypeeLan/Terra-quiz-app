@@ -24,11 +24,13 @@ if (nodeEnv === "development") {
   app.use(morgan("dev"));
 }
 
-// Rate limiting
+app.set("trust proxy", 1);
+
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
 });
+
 app.use(limiter);
 
 app.use(express.json({ limit: "10kb" }));
